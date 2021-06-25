@@ -6,11 +6,39 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
+
       - name: Setup .NET SDK 5.0.x
         uses: actions/setup-dotnet@v1.7.2
         with:
           dotnet-version: '5.0.x'
+
       - name: Install dependencies
         run: dotnet restore
+
       - name: Build
         run: dotnet build --configuration Release --no-restore
+
+      - name: Azure CLI Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          enable-AzPSSession: true
+
+      - name: Run Azure PowerShell script
+        uses: azure/powershell@v1
+        with:
+          inlineScript: >
+            Deployment\Deploy.ps1 
+            -StackName ${{ secrets.STACKNAME }} 
+            -Location ${{ secrets.LOCATION }}
+            -AppEnvironment ${{ secrets.APP_ENVIRONMENT }}
+            -Branch ${{ env.GITHUB_REF }}
+            -KeyVaultName ${{ secrets.KEY_VAULT_NAME }}
+            -DeployResourceGroupName ${{ secrets.DEPLOY_RESOURCE_GROUP_NAME }}
+            -KeyVaultResourceGroupName ${{ secrets.KEY_VAULT_RESOURCE_GROUP_NAME }}
+            -SubscriptionId ${{ secrets.SUBSCRIPTION_ID }}
+            -Domain ${{ secrets.DOMAIN }}
+            -TenantId ${{ secrets.TENANT_ID }}
+            -ClientId ${{ secrets.CLIENT_ID }}
+            -ClientSecret ${{ secrets.CLIENT_SECRET }}
+          azPSVersion: "latest"
