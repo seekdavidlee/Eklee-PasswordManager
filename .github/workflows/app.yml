@@ -42,3 +42,6 @@ jobs:
             -ClientId ${{ secrets.CLIENT_ID }}
             -ClientSecret ${{ secrets.CLIENT_SECRET }}
           azPSVersion: "latest"
+
+      - name: Publish
+        run: dotnet publish --configuration Release -o '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/app'
