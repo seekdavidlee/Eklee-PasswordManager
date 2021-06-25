@@ -1,0 +1,110 @@
+﻿@page "/"
+@using Eklee.PasswordManager.Core
+@using Microsoft.Identity.Web
+@inject ClipboardService ClipboardService
+@inject IKeyVaultClient _keyVaultClient
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject MicrosoftIdentityConsentAndConditionalAccessHandler ConsentHandler
+@code{
+
+	private string TokenMessage;
+	private List<SecretItem> _secrets;
+
+	protected override async Task OnInitializedAsync()
+	{
+		try
+		{
+			var state = await this.AuthenticationStateProvider.GetAuthenticationStateAsync();
+			if (state.User.Identity.IsAuthenticated)
+			{
+				_secrets = (await _keyVaultClient.ListSecrets(state.User)).ToList();
+			}
+		}
+		catch (Exception e)
+		{
+			ConsentHandler.HandleException(e);
+			TokenMessage = e.Message;
+		}
+	}
+
+	private async Task CopyToClipboard(SecretItem item)
+	{
+		SecretValue secret = null;
+		try
+		{
+			secret = await _keyVaultClient.GetSecretValue(item.Name);
+			await ClipboardService.WriteTextAsync(secret.Value);
+			item.Copied = true;
+		}
+		catch (Exception e)
+		{
+			if (secret != null)
+			{
+				item.Value = secret.Value;
+				item.ShowInput = true;
+			}
+			else
+			{
+				TokenMessage = e.Message;
+			}
+
+		}
+	}
+
+	private void DoneCopy(SecretItem item)
+	{
+		item.Value = null;
+		item.ShowInput = false;
+	}
+}
+<h1>Secrets</h1>
+<div>@TokenMessage</div>
+<table class="table">
+	<thead>
+		<tr>
+			<th>Name</th>
+			<td></td>
+			<td></td>
+		</tr>
+	</thead>
+	<tbody>
+
+		@if (_secrets != null)
+		{
+			foreach (var item in _secrets)
+			{
+		<tr>
+			<td>@item.Name</td>
+			<td>
+				<button type="button" class="btn btn-primary" @onclick="async () => await CopyToClipboard(item)">Copy to Clipboard</button>
+			</td>
+			<td>
+				@{
+							if (item.Copied)
+							{
+					<div>Copied!</div>
+							}
+				}
+			</td>
+		</tr>
+
+				if (item.ShowInput)
+				{
+		<tr><td colspan="3">Unable to copy. Please select and copy from below.</td></tr>
+		<tr>
+			<td colspan="3">
+				<input class="form-control" type="text" value="@item.Value" disabled>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="3">
+				<button type="button" class="btn btn-primary" @onclick="() => DoneCopy(item)">Done</button>
+			</td>
+		</tr>
+				}
+			}
+		}
+
+	</tbody>
+
+</table>
