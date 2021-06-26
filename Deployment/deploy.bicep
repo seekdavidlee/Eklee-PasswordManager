@@ -19,6 +19,7 @@ var tags = {
 var appInsightsTag = {
   // circular dependency means we can't reference functionApp directly  /subscriptions/<subscriptionId>/resourceGroups/<rg-name>/providers/Microsoft.Web/sites/<appName>"
   'hidden-link:/subscriptions/${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.Web/sites/${stackName}': 'Resource'
+  'team': 'platform'
 }
 
 resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' = {
