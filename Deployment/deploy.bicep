@@ -10,6 +10,12 @@ param tenantId string
 param clientId string
 param clientSecret string
 
+var tags = {
+  'stack-name': stackName
+  'environment': appEnvironment
+  'branch': branch
+}
+
 resource hostingPlan 'Microsoft.Web/serverfarms@2020-10-01' = {
   name: stackName
   location: location
@@ -17,22 +23,20 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2020-10-01' = {
     name: 'F1'
     tier: 'Free'
   }
+  tags: tags
 }
 
 resource app1 'Microsoft.Web/sites@2020-12-01' = {
   name: stackName
   location: location
-  tags: {
-    'stack-name': stackName
-    'environment': appEnvironment
-    'branch': branch
-  }
+  tags: tags
   kind: 'app'
   properties: {
     httpsOnly: true
     serverFarmId: hostingPlan.id
     clientAffinityEnabled: true
     siteConfig: {
+      netFrameworkVersion: 'v5.0'
       appSettings: [
         {
           'name': 'KeyVaultName'
