@@ -67,7 +67,7 @@ resource passwordManagerApp 'Microsoft.Web/sites@2020-12-01' = {
         }
         {
           'name': 'KeyVaultApi:BaseUrl'
-          'value': 'https://${keyVaultName}.${environment().suffixes.keyvaultDns}'
+          'value': 'https://${keyVaultName}${environment().suffixes.keyvaultDns}'
         }
         {
           'name': 'KeyVaultApi:Scopes'
