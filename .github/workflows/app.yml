@@ -33,7 +33,7 @@ jobs:
             -StackName ${{ secrets.STACKNAME }} 
             -Location ${{ secrets.LOCATION }}
             -AppEnvironment ${{ secrets.APP_ENVIRONMENT }}
-            -Branch ${{ env.GITHUB_REF }}
+            -Branch ${{ github.ref }}
             -KeyVaultName ${{ secrets.KEY_VAULT_NAME }}
             -DeployResourceGroupName ${{ secrets.DEPLOY_RESOURCE_GROUP_NAME }}
             -KeyVaultResourceGroupName ${{ secrets.KEY_VAULT_RESOURCE_GROUP_NAME }}
