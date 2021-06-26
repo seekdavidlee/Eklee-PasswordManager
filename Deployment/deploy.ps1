@@ -6,9 +6,7 @@ param(
     $KeyVaultName,
     $DeployResourceGroupName,
     $KeyVaultResourceGroupName,
-    $SubscriptionId,
     $Domain,
-    $TenantId,
     $ClientId,
     $ClientSecret)
 
@@ -24,7 +22,7 @@ if ($found -eq $false) {
     New-AzResourceGroup -Location $Location -Name $DeployResourceGroupName
 }
 
-$DeploymentName = (Get-Date -Format "yyyyMMddhhmmss") + "deployment"
+$DeploymentName = "passwordmanager-" + (Get-Date -Format "yyyyMMddhhmmss") + "-deployment"
 
 $parameters = @{
     stackName         = $StackName;
@@ -33,9 +31,7 @@ $parameters = @{
     branch            = $Branch;
     keyVaultName      = $KeyVaultName;
     resourceGroupName = $KeyVaultResourceGroupName;
-    subscriptionId    = $SubscriptionId;
     domain            = $Domain;
-    tenantId          = $TenantId;
     clientId          = $ClientId;
     clientSecret      = $ClientSecret;
 }

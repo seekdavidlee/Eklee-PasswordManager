@@ -4,9 +4,9 @@ param appEnvironment string
 param branch string
 param keyVaultName string
 param resourceGroupName string
-param subscriptionId string
+param subscriptionId string = subscription().id
 param domain string
-param tenantId string
+param tenantId string = subscription().tenantId
 param clientId string
 param clientSecret string
 
@@ -14,6 +14,23 @@ var tags = {
   'stack-name': stackName
   'environment': appEnvironment
   'branch': branch
+}
+
+var appInsightsTag = {
+  // circular dependency means we can't reference functionApp directly  /subscriptions/<subscriptionId>/resourceGroups/<rg-name>/providers/Microsoft.Web/sites/<appName>"
+  'hidden-link:/subscriptions/${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.Web/sites/${stackName}': 'Resource'
+}
+
+resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' = {
+  name: stackName
+  location: location
+  kind: 'web'
+  tags: union(tags, appInsightsTag)
+  properties: {
+    Application_Type: 'web'
+    publicNetworkAccessForIngestion: 'Enabled'
+    publicNetworkAccessForQuery: 'Enabled'
+  }
 }
 
 resource hostingPlan 'Microsoft.Web/serverfarms@2020-10-01' = {
@@ -26,7 +43,7 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2020-10-01' = {
   tags: tags
 }
 
-resource app1 'Microsoft.Web/sites@2020-12-01' = {
+resource passwordManagerApp 'Microsoft.Web/sites@2020-12-01' = {
   name: stackName
   location: location
   tags: tags
@@ -37,7 +54,12 @@ resource app1 'Microsoft.Web/sites@2020-12-01' = {
     clientAffinityEnabled: true
     siteConfig: {
       netFrameworkVersion: 'v5.0'
+      webSocketsEnabled: true
       appSettings: [
+        {
+          'name': 'APPINSIGHTS_INSTRUMENTATIONKEY'
+          'value': appInsights.properties.InstrumentationKey
+        }
         {
           'name': 'KeyVaultName'
           'value': keyVaultName
@@ -89,6 +111,18 @@ resource app1 'Microsoft.Web/sites@2020-12-01' = {
         {
           'name': 'AzureAd:CallbackPath'
           'value': '/signin-oidc'
+        }
+        {
+          'name': 'ApplicationInsightsAgent_EXTENSION_VERSION'
+          'value': '~2'
+        }
+        {
+          'name': 'XDT_MicrosoftApplicationInsights_Mode'
+          'value': 'default'
+        }
+        {
+          'name': 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+          'value': appInsights.properties.ConnectionString
         }
       ]
     }
