@@ -40,4 +40,4 @@ New-AzResourceGroupDeployment `
     -Name $DeploymentName `
     -ResourceGroupName $DeployResourceGroupName `
     -TemplateFile .\Deployment\deploy.json `
-    -TemplateParameterObject $parameters 
+    -TemplateParameterObject $parameters

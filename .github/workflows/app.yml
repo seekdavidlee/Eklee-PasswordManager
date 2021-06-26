@@ -28,7 +28,7 @@ jobs:
       - name: Azure Bicep Build
         run: az bicep build --file Deployment/deploy.bicep
 
-      - name: Run Azure PowerShell script
+      - name: Build Azure environment
         uses: azure/powershell@v1
         with:
           inlineScript: >
@@ -45,11 +45,11 @@ jobs:
             -ClientSecret ${{ secrets.CLIENT_SECRET }}
           azPSVersion: "latest"
 
-      - name: Publish, Zip, Deploy
-        uses: azure/CLI@v1
+      - name: Publish, Zip, Deploy App
+        uses: azure/powershell@v1
         with:
-          azcliversion: "latest"
+          azPSVersion: "latest"
           inlineScript: >
             dotnet publish --configuration Release -o '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/app'
             Compress-Archive -Path "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/app/*" -DestinationPath app.zip
-            az webapp deployment source config-zip --resource-group ${{ secrets.DEPLOY_RESOURCE_GROUP_NAME }} --name ${{ secrets.STACKNAME }} --src app.zip
+            Publish-AzWebapp -ResourceGroupName ${{ secrets.DEPLOY_RESOURCE_GROUP_NAME }} -Name ${{ secrets.STACKNAME }} -ArchivePath app.zip
