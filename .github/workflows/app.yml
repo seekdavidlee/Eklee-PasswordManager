@@ -51,6 +51,5 @@ jobs:
           azcliversion: "latest"
           inlineScript: >
             dotnet publish --configuration Release -o '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/app'
-            cd '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/app'
-            zip -r app.zip .
+            Compress-Archive -Path "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/app/*" -DestinationPath app.zip
             az webapp deployment source config-zip --resource-group ${{ secrets.DEPLOY_RESOURCE_GROUP_NAME }} --name ${{ secrets.STACKNAME }} --src app.zip
