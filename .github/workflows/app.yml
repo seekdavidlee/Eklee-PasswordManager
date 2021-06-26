@@ -25,10 +25,10 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           enable-AzPSSession: true
 
-      - name: Azure Bicep Build
+      - name: Build Azure environment template
         run: az bicep build --file Deployment/deploy.bicep
 
-      - name: Build Azure environment and Deploy
+      - name: Build Azure environment and deploy app
         uses: azure/powershell@v1
         with:
           inlineScript: >

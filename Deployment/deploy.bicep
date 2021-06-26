@@ -4,7 +4,7 @@ param appEnvironment string
 param branch string
 param keyVaultName string
 param resourceGroupName string
-param subscriptionId string = subscription().id
+param subscriptionId string = replace(subscription().id, '/subscriptions/', '')
 param domain string
 param tenantId string = subscription().tenantId
 param clientId string
