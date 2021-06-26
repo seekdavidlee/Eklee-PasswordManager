@@ -43,5 +43,5 @@ $parameters = @{
 New-AzResourceGroupDeployment `
     -Name $DeploymentName `
     -ResourceGroupName $DeployResourceGroupName `
-    -TemplateFile .\Deployment\deploy.bicep `
+    -TemplateFile .\Deployment\deploy.json `
     -TemplateParameterObject $parameters 

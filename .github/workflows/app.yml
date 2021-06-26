@@ -25,6 +25,10 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           enable-AzPSSession: true
 
+      - name: Azure Bicep Build
+        run: |
+          az bicep build --file Deployment/deploy.bicep
+
       - name: Run Azure PowerShell script
         uses: azure/powershell@v1
         with:
