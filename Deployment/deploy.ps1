@@ -44,4 +44,4 @@ New-AzResourceGroupDeployment `
 
 dotnet publish --configuration Release -o .\app
 Compress-Archive -Path ".\app\*" -DestinationPath .\app.zip
-Publish-AzWebapp -ResourceGroupName $DeployResourceGroupName -Name $StackName -ArchivePath .\app.zip
+Publish-AzWebapp -ResourceGroupName $DeployResourceGroupName -Name $StackName -ArchivePath .\app.zip -Force
