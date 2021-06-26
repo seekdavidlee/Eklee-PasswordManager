@@ -125,6 +125,10 @@ resource passwordManagerApp 'Microsoft.Web/sites@2020-12-01' = {
           'name': 'APPLICATIONINSIGHTS_CONNECTION_STRING'
           'value': appInsights.properties.ConnectionString
         }
+        {
+          'name': 'ASPNETCORE_ENVIRONMENT'
+          'value': 'development'
+        }
       ]
     }
   }
