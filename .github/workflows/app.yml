@@ -2,10 +2,11 @@ on: push
 
 jobs:
   setup:
-    name: Setup Environment
+    name: Setup Environment Job
     runs-on: windows-latest
     steps:
-      - name: Setup
+      - id: setup
+        name: Setup Environment Setp
         run: |
           if ('${{ github.ref }}' -eq 'ref/head/main') { 
             echo "::set-output name=build_env::prod" 
@@ -13,7 +14,7 @@ jobs:
             echo "::set-output name=build_env::dev" 
           }
     outputs:
-      build_env: ${{ steps.Setup.outputs.build_env }}
+      build_env: ${{ steps.setup.outputs.build_env }}
 
   build_project:
     needs: setup
