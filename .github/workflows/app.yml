@@ -1,16 +1,62 @@
 on: push
 
 jobs:
-  build_project:
-    name: Build Project
+  setup:
+    name: Choose Secrets Environment Job
+    runs-on: windows-latest
+    steps:
+      - id: setup
+        name: Setup Environment Setp
+        run: |
+          if ('${{ github.ref }}' -eq 'ref/head/main') { 
+            echo "::set-output name=build_env::prod" 
+          } else {
+            echo "::set-output name=build_env::dev" 
+          }
+    outputs:
+      build_env: ${{ steps.setup.outputs.build_env }}
+
+  build_deploy_password_manager:
+    name: Build, Deploy Password Manager Job
+    needs: setup
+    environment: ${{ needs.setup.outputs.build_env }}
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
+
       - name: Setup .NET SDK 5.0.x
         uses: actions/setup-dotnet@v1.7.2
         with:
           dotnet-version: '5.0.x'
+
       - name: Install dependencies
         run: dotnet restore
+
       - name: Build
         run: dotnet build --configuration Release --no-restore
+
+      - name: Azure CLI Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          enable-AzPSSession: true
+
+      - name: Build Azure environment template
+        run: az bicep build --file Deployment/deploy.bicep
+
+      - name: Build Azure environment and deploy app
+        uses: azure/powershell@v1
+        with:
+          inlineScript: >
+            Deployment\Deploy.ps1 
+            -StackName ${{ secrets.STACKNAME }} 
+            -Location ${{ secrets.LOCATION }}
+            -AppEnvironment ${{ secrets.APP_ENVIRONMENT }}
+            -Branch ${{ github.ref }}
+            -KeyVaultName ${{ secrets.KEY_VAULT_NAME }}
+            -DeployResourceGroupName ${{ secrets.DEPLOY_RESOURCE_GROUP_NAME }}
+            -KeyVaultResourceGroupName ${{ secrets.KEY_VAULT_RESOURCE_GROUP_NAME }}
+            -Domain ${{ secrets.DOMAIN }}
+            -ClientId ${{ secrets.CLIENT_ID }}
+            -ClientSecret ${{ secrets.CLIENT_SECRET }}
+          azPSVersion: "latest"
