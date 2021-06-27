@@ -7,7 +7,7 @@ jobs:
     steps:
       - name: Setup
         run: |
-          if ( '${{ env.github_ref }}' == 'ref/head/main' ) {
+          if ( '${{ GITHUB_REF }}' == 'ref/head/main' ) {
             echo "::set-output name=build_env::prod"
           } else {
             echo "::set-output name=build_env::dev"
