@@ -9,14 +9,16 @@ jobs:
         run: |
           if [[ '${{ env.github_ref }}' == 'ref/head/main' ]]
           then
-            echo "build_env=prod" >> $GITHUB_ENV
+            echo "::set-output name=build_env::prod"
           else
-            echo "build_env=dev" >> $GITHUB_ENV
+            echo "::set-output name=build_env::dev"
           fi
+    outputs:
+      build_env: ${{ steps.Setup.outputs.build_env }}
 
   build_project:
     needs: setup
-    environment: ${{ env.build_env }}
+    environment: ${{ needs.setup.outputs.build_env }}
     name: Build Project
     runs-on: windows-latest
     steps:
