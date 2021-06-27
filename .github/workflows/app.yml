@@ -16,7 +16,7 @@ jobs:
 
   build_project:
     needs: setup
-    environment: ${{ build_env }}
+    environment: ${{ env.build_env }}
     name: Build Project
     runs-on: windows-latest
     steps:
