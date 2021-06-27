@@ -2,7 +2,7 @@ on: push
 
 jobs:
   setup:
-    name: Setup Environment Job
+    name: Choose Secrets Environment Job
     runs-on: windows-latest
     steps:
       - id: setup
@@ -16,10 +16,10 @@ jobs:
     outputs:
       build_env: ${{ steps.setup.outputs.build_env }}
 
-  build_project:
+  build_deploy_password_manager:
+    name: Build, Deploy Password Manager Job
     needs: setup
     environment: ${{ needs.setup.outputs.build_env }}
-    name: Build Project
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
