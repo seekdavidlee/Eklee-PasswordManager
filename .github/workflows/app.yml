@@ -9,7 +9,7 @@ jobs:
         name: Setup Environment Setp
         run: |
           echo "::debug::Branch ${{ github.ref }}"
-          if ('${{ github.ref }}' -eq 'ref/head/main') { 
+          if ('${{ github.ref }}' -eq 'refs/heads/main') { 
             echo "::set-output name=build_env::prod" 
           } else {
             echo "::set-output name=build_env::dev" 
