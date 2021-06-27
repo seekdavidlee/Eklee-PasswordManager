@@ -1,8 +1,22 @@
 on: push
 
 jobs:
+  setup:
+    name: Setup Environment
+    runs-on: windows-latest
+    steps:
+      - name: Setup
+        run: |
+          if [[ '${{ env.github_ref }}' == 'ref/head/main' ]]
+          then
+            echo "build_env=prod" >> $GITHUB_ENV
+          else
+            echo "build_env=dev" >> $GITHUB_ENV
+          fi
+
   build_project:
-    environment: ${{ github.ref == 'ref/head/main' ? 'prod' : 'dev' }}
+    needs: setup
+    environment: ${{ build_env }}
     name: Build Project
     runs-on: windows-latest
     steps:
