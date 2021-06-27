@@ -8,6 +8,7 @@ jobs:
       - id: setup
         name: Setup Environment Setp
         run: |
+          echo "::debug::Branch ${{ github.ref }}"
           if ('${{ github.ref }}' -eq 'ref/head/main') { 
             echo "::set-output name=build_env::prod" 
           } else {
