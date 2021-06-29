@@ -64,7 +64,7 @@ jobs:
 
       - id: testresults
         name: Test
-        run: Deployment\Test.ps1 -StackName ${{ secrets.STACKNAME }} -TenantId ${{ secrets.TENANT_ID }} -ReportDirectory "${{ env.GITHUB_WORKSPACE }}" -TestConfig "${{ secrets.TEST_CONFIG }}"
+        run: Deployment\Test.ps1 -StackName ${{ secrets.STACKNAME }} -TenantId ${{ secrets.TENANT_ID }} -ReportDirectory "${{ env.RUNNER_TEMP }}" -TestConfig "${{ secrets.TEST_CONFIG }}"
 
       - name: Publish dotnet test results
         uses: EnricoMi/publish-unit-test-result-action/composite@v1
