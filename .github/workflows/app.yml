@@ -45,7 +45,7 @@ jobs:
       - name: Build Azure environment template
         run: az bicep build --file Deployment/deploy.bicep
 
-      - name: Build Azure environment and deploy app
+      - name: Build Azure environment resources and deploy app
         uses: azure/powershell@v1
         with:
           inlineScript: >
@@ -60,4 +60,25 @@ jobs:
             -Domain ${{ secrets.DOMAIN }}
             -ClientId ${{ secrets.CLIENT_ID }}
             -ClientSecret ${{ secrets.CLIENT_SECRET }}
+          azPSVersion: "latest"
+
+      - id: testresults
+        if: ${{ github.ref != 'refs/heads/main' }}
+        name: Test
+        run: Deployment\Test.ps1 -StackName ${{ secrets.STACKNAME }} -TenantId ${{ secrets.TENANT_ID }} -ReportDirectory "${{ env.RUNNER_TEMP }}" -TestConfig "${{ secrets.TEST_CONFIG }}"
+
+      - name: Publish dotnet test results
+        if: ${{ github.ref != 'refs/heads/main' }}
+        uses: EnricoMi/publish-unit-test-result-action/composite@v1
+        with:
+          files: ${{ steps.testresults.outputs.test_file_path }}
+
+      - name: Teardown Azure environment resources (except production)
+        if: ${{ github.ref != 'refs/heads/main' && success() }}
+        uses: azure/powershell@v1
+        with:
+          inlineScript: >
+            Deployment\Teardown.ps1 
+            -StackName ${{ secrets.STACKNAME }}
+            -DeployResourceGroupName ${{ secrets.DEPLOY_RESOURCE_GROUP_NAME }}
           azPSVersion: "latest"
