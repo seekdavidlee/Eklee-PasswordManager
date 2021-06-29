@@ -70,7 +70,6 @@ jobs:
       - name: Publish dotnet test results
         if: ${{ github.ref != 'refs/heads/main' }}
         uses: EnricoMi/publish-unit-test-result-action/composite@v1
-        if: always()
         with:
           files: ${{ steps.testresults.outputs.test_file_path }}
 
