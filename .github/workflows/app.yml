@@ -63,4 +63,6 @@ jobs:
           azPSVersion: "latest"
 
       - name: Test
-        run: Deployment\Test.ps1 -StackName ${{ secrets.STACKNAME }} -TenantId ${{ secrets.TENANT_ID }} -TestConfig "${{ secrets.TEST_CONFIG }}"
+        run: |
+          "${{ secrets.TEST_CONFIG }}">outfile.txt 
+          Deployment\Test.ps1 -StackName ${{ secrets.STACKNAME }} -TenantId ${{ secrets.TENANT_ID }} -TestConfig outfile.txt
