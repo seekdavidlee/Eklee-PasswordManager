@@ -63,6 +63,4 @@ jobs:
           azPSVersion: "latest"
 
       - name: Test
-        run: |
-          $TestConfig = "${{ secrets.TEST_CONFIG }}" | ConvertFrom-Json -Depth 10
-          Deployment\Test.ps1 -StackName ${{ secrets.STACKNAME }} -TenantId ${{ secrets.TENANT_ID }} -TestConfig $TestConfig
+        run: Deployment\Test.ps1 -StackName ${{ secrets.STACKNAME }} -TenantId ${{ secrets.TENANT_ID }} -TestConfig "${{ secrets.TEST_CONFIG }}"
