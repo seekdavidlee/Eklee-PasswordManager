@@ -64,5 +64,5 @@ jobs:
 
       - name: Test
         run: |
-          "${{ secrets.TEST_CONFIG }}">config.txt
+          Set-Content config.txt -Value "${{ secrets.TEST_CONFIG }}"
           Deployment\Test.ps1 -StackName ${{ secrets.STACKNAME }} -TenantId ${{ secrets.TENANT_ID }} -TestConfig config.txt
