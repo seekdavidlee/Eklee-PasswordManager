@@ -62,14 +62,15 @@ jobs:
             -ClientSecret ${{ secrets.CLIENT_SECRET }}
           azPSVersion: "latest"
 
-      - name: Test
+      - id: testresults
+        name: Test
         run: Deployment\Test.ps1 -StackName ${{ secrets.STACKNAME }} -TenantId ${{ secrets.TENANT_ID }} -ReportDirectory "${{ env.GITHUB_WORKSPACE }}" -TestConfig "${{ secrets.TEST_CONFIG }}"
 
       - name: Publish dotnet test results
         uses: EnricoMi/publish-unit-test-result-action/composite@v1
         if: always()
         with:
-          files: ${{ env.GITHUB_WORKSPACE }}/TestResults/results.xml
+          files: ${{ steps.testresults.outputs.test_file_path }}
 
       - name: Teardown Azure environment resources (except production)
         if: ${{ github.ref != 'refs/heads/main' && success() }}
