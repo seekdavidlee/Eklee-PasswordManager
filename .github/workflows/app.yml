@@ -76,7 +76,7 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action/composite@v1
         if: always()
         with:
-          files: TestResults/**/*.xml   
+          files: TestResults/results.xml   
 
       - name: Teardown Azure environment resources (except production)
         if: ${{ github.ref != 'refs/heads/main' && success() }}

@@ -56,7 +56,7 @@ namespace Eklee.PasswordManager.Tests
 
 				edge.Navigate().GoToUrl(_applicationUrl);
 
-				WebDriverWait wait = new WebDriverWait(edge, TimeSpan.FromSeconds(5));
+				WebDriverWait wait = new(edge, TimeSpan.FromSeconds(5));
 				wait.Until(x => x.Url.StartsWith($"https://login.microsoftonline.com/{_tenantId}/oauth2/v2.0/authorize?client_id"));
 
 				var email = edge.FindElementByName("loginfmt");
