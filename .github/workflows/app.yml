@@ -61,3 +61,11 @@ jobs:
             -ClientId ${{ secrets.CLIENT_ID }}
             -ClientSecret ${{ secrets.CLIENT_SECRET }}
           azPSVersion: "latest"
+
+      - name: Test
+        run: >
+          $testConfigString = "${{ secrets.TEST_CONFIG }}"
+          $testConfigString = $testConfigString.Replace("%TenantId%","${{ secrets.TENANT_ID }}")
+          $testConfigString = $testConfigString.Replace("%StackName%","${{ secrets.STACKNAME }}")
+          Set-Content -Path Eklee.PasswordManager.Tests/appsettings.json -Value $testConfigString
+          dotnet test
