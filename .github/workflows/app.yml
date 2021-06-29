@@ -65,13 +65,6 @@ jobs:
       - name: Test
         run: Deployment\Test.ps1 -StackName ${{ secrets.STACKNAME }} -TenantId ${{ secrets.TENANT_ID }} -TestConfig "${{ secrets.TEST_CONFIG }}"
 
-      - name: Upload dotnet test results
-        uses: actions/upload-artifact@v2
-        with:
-          name: dotnet-results
-          path: TestResults
-        if: ${{ always() }}
-
       - name: Publish dotnet test results
         uses: EnricoMi/publish-unit-test-result-action/composite@v1
         if: always()
