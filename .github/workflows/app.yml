@@ -72,6 +72,12 @@ jobs:
           path: TestResults
         if: ${{ always() }}
 
+      - name: Publish dotnet test results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
+        with:
+          files: TestResults/**/*.xml   
+
       - name: Teardown Azure environment resources (except production)
         if: ${{ github.ref != 'refs/heads/main' && success() }}
         uses: azure/powershell@v1

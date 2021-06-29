@@ -9,7 +9,12 @@ if ($resources.Length -eq 0) {
 }
 
 $resources | ForEach-Object {
-    $id = $_.Id 
-    Remove-AzResource -ResourceId $id -Force
-    Write-Output "::debug::Removed resource $id"
+    $id = $_.Id
+    try {
+        Remove-AzResource -ResourceId $id -Force
+        Write-Output "::debug::Removed resource $id"
+    }
+    catch {
+        Write-Output "::debug::Skip resource $id"
+    }
 }
