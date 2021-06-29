@@ -1,6 +1,6 @@
 param($TenantId, $StackName, $TestConfig)
 
-$testConfigObj = Get-Content $TestConfig | ConvertFrom-Json -Depth 10
+$testConfigObj = Get-Content $TestConfig -Raw | ConvertFrom-Json -Depth 10
 $testConfigObj.ApplicationUrl = "https://$StackName.azurewebsites.net"
 Write-Output ("::debug::Application Url " + $testConfigObj.ApplicationUrl)
 $testConfigObj.TenantId = $TenantId
