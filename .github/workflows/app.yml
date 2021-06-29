@@ -63,7 +63,7 @@ jobs:
           azPSVersion: "latest"
 
       - name: Test
-        run: >
+        run: |
           $testConfigString = "${{ secrets.TEST_CONFIG }}"
           $testConfigString = $testConfigString.Replace("%TenantId%","${{ secrets.TENANT_ID }}")
           $testConfigString = $testConfigString.Replace("%StackName%","${{ secrets.STACKNAME }}")
