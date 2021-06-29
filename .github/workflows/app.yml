@@ -45,7 +45,7 @@ jobs:
       - name: Build Azure environment template
         run: az bicep build --file Deployment/deploy.bicep
 
-      - name: Build Azure environment and deploy app
+      - name: Build Azure environment resources and deploy app
         uses: azure/powershell@v1
         with:
           inlineScript: >
@@ -71,3 +71,13 @@ jobs:
           name: dotnet-results
           path: TestResults
         if: ${{ always() }}
+
+      - name: Teardown Azure environment resources (except production)
+        if: ${{ github.ref != 'refs/heads/main' && success() }}
+        uses: azure/powershell@v1
+        with:
+          inlineScript: >
+            Deployment\Teardown.ps1 
+            -StackName ${{ secrets.STACKNAME }}
+            -DeployResourceGroupName ${{ secrets.DEPLOY_RESOURCE_GROUP_NAME }}
+          azPSVersion: "latest"
