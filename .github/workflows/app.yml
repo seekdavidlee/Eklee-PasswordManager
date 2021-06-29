@@ -64,5 +64,5 @@ jobs:
 
       - name: Test
         run: |
-          "${{ secrets.TEST_CONFIG }}">outfile.txt 
-          Deployment\Test.ps1 -StackName ${{ secrets.STACKNAME }} -TenantId ${{ secrets.TENANT_ID }} -TestConfig outfile.txt
+          $TestConfig = "${{ secrets.TEST_CONFIG }}" | ConvertFrom-Json -Depth 10
+          Deployment\Test.ps1 -StackName ${{ secrets.STACKNAME }} -TenantId ${{ secrets.TENANT_ID }} -TestConfig $TestConfig
