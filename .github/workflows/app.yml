@@ -63,6 +63,4 @@ jobs:
           azPSVersion: "latest"
 
       - name: Test
-        run: |
-          Set-Content -Path config.txt -Value "${{ secrets.TEST_CONFIG }}"
-          Deployment\Test.ps1 -StackName ${{ secrets.STACKNAME }} -TenantId ${{ secrets.TENANT_ID }} -TestConfig config.txt
+        run: Deployment\Test.ps1 -StackName ${{ secrets.STACKNAME }} -TenantId ${{ secrets.TENANT_ID }} -TestConfig "${{ secrets.TEST_CONFIG }}"
