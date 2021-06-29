@@ -63,11 +63,4 @@ jobs:
           azPSVersion: "latest"
 
       - name: Test
-        run: |
-          $testConfig = "${{ secrets.TEST_CONFIG }}" | ConvertFrom-Json -Depth 10
-          $testConfig.ApplicationUrl = "https://"+ "${{ secrets.STACKNAME }}" + "azurewebsites.net"
-          echo ("::debug::Application Url " + $testConfig.ApplicationUrl)
-          $testConfig.TenantId = "${{ secrets.TENANT_ID }}" 
-          $testConfigString = $testConfig | ConvertTo-Json -Depth 10
-          Set-Content -Path Eklee.PasswordManager.Tests/appsettings.json -Value $testConfigString
-          dotnet test
+        run: Deployment\Test.ps1 -StackName ${{ secrets.STACKNAME }} -TenantId ${{ secrets.TENANT_ID }} -TestConfig "${{ secrets.TEST_CONFIG }}"
