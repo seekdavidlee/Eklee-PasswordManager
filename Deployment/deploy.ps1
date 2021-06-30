@@ -48,8 +48,7 @@ try {
         -Scope $deployment.Outputs.storageId.Value
 }
 catch [Microsoft.Rest.Azure.CloudException] {
-    $err = $error[0].Exception | Select-Object *
-    throw $err.Body.Message
+    throw $error[0].Exception.Body.Message
 }
 
 dotnet publish --configuration Release -o .\app
