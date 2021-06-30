@@ -6,7 +6,7 @@ namespace Eklee.PasswordManager.Tests
 	public class LandingPageTests : BaseTest
 	{
 		[TestMethod]
-		public void AssignedSecretsExistForUserWithPartialAccess()
+		public void PartialSecretsAssignedToUser_UserSeesAssignedSecrets()
 		{
 			LoginAndDoTest(edge =>
 			{
@@ -16,6 +16,32 @@ namespace Eklee.PasswordManager.Tests
 				edge.AssertTableColumnTextIsPresent("app2secret1");
 				edge.AssertTableColumnTextIsPresent("app2secret2");
 			}, Constants.AutomationAccount1);
+		}
+
+		[TestMethod]
+		public void NoSecretsAssignedToUser_UserDoNotSeeAnySecrets()
+		{
+			LoginAndDoTest(edge =>
+			{
+				edge.AssertTableColumnTextIsMissing("app1secret1");
+				edge.AssertTableColumnTextIsMissing("app1secret2");
+
+				edge.AssertTableColumnTextIsMissing("app2secret1");
+				edge.AssertTableColumnTextIsMissing("app2secret2");
+			}, Constants.AutomationAccount2);
+		}
+
+		[TestMethod]
+		public void AllSecretsAssignedToUser_UserSeesAllSecrets()
+		{
+			LoginAndDoTest(edge =>
+			{
+				edge.AssertTableColumnTextIsPresent("app1secret1");
+				edge.AssertTableColumnTextIsPresent("app1secret2");
+
+				edge.AssertTableColumnTextIsPresent("app2secret1");
+				edge.AssertTableColumnTextIsPresent("app2secret2");
+			}, Constants.AutomationAccount3);
 		}
 	}
 }

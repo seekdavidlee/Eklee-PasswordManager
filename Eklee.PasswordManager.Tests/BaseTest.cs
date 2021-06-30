@@ -55,45 +55,29 @@ namespace Eklee.PasswordManager.Tests
 				edge.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
 
 				edge.Navigate().GoToUrl(_applicationUrl);
-
-				WebDriverWait wait = new(edge, TimeSpan.FromSeconds(5));
-				wait.Until(x => x.Url.StartsWith($"https://login.microsoftonline.com/{_tenantId}/oauth2/v2.0/authorize?client_id"));
+				edge.WaitForUrl($"https://login.microsoftonline.com/{_tenantId}/oauth2/v2.0/authorize?client_id", WaitForUrlComparisons.StartsWith);
 
 				var email = edge.FindElementByName("loginfmt");
 				email.SendKeys(userProfile.Username);
 
-				var next = edge.FindElement(By.XPath("//input[@value = 'Next']"));
-				next.Click();
+				edge.FindAndClickElement("//input[@value = 'Next']");
 
-				wait = new WebDriverWait(edge, TimeSpan.FromSeconds(5));
-				wait.Until(x => SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.XPath("//input[@placeholder = 'Password']")));
+				edge.FindAndTypeTextInElement("//input[@placeholder = 'Password']", userProfile.Password);
 
-				var password = edge.FindElement(By.XPath("//input[@placeholder = 'Password']"));
-				password.SendKeys(userProfile.Password);
+				edge.FindAndClickElement("//input[@value = 'Sign in']");
 
-				var signIn = edge.FindElement(By.XPath("//input[@value = 'Sign in']"));
-				signIn.Click();
+				edge.WaitForUrl($"https://login.microsoftonline.com/{_tenantId}/login", WaitForUrlComparisons.Equals);
 
-				wait = new WebDriverWait(edge, TimeSpan.FromSeconds(5));
-				wait.Until(x => x.Url == $"https://login.microsoftonline.com/{_tenantId}/login");
+				edge.FindAndClickElement("//input[@value = 'Next']");
 
-				next = edge.FindElement(By.XPath("//input[@value = 'Next']"));
-				next.Click();
+				edge.WaitForUrl("https://mysignins.microsoft.com/register?csrf_token=", WaitForUrlComparisons.StartsWith);
 
-				wait = new WebDriverWait(edge, TimeSpan.FromSeconds(5));
-				wait.Until(x => x.Url.StartsWith("https://mysignins.microsoft.com/register?csrf_token="));
-
-				wait = new WebDriverWait(edge, TimeSpan.FromSeconds(10));
-				wait.Until(x => SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.XPath("//a[text() = 'Skip setup']")));
-
-				var skipSetup = edge.FindElement(By.XPath("//a[text() = 'Skip setup']"));
-				skipSetup.Click();
+				edge.FindAndClickElement("//a[text() = 'Skip setup']");
 
 				var noStaySignedIn = edge.FindElementById("idBtn_Back");
 				noStaySignedIn.Click();
 
-				wait = new WebDriverWait(edge, TimeSpan.FromSeconds(5));
-				wait.Until(x => x.Url.StartsWith(""));
+				edge.WaitForUrl(_applicationUrl, WaitForUrlComparisons.StartsWith);
 
 				doTest(edge);
 			}
