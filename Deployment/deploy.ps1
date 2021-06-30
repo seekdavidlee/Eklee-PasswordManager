@@ -42,9 +42,9 @@ $deployment = New-AzResourceGroupDeployment `
     -TemplateFile .\Deployment\deploy.json `
     -TemplateParameterObject $parameters
 
-New-AzRoleAssignment -ObjectId $deployment.Outputs.passwordManagerAppIdentityId `
+New-AzRoleAssignment -ObjectId $deployment.Outputs.passwordManagerAppIdentityId.Value `
     -RoleDefinitionName 'Storage Blob Data Contributor' `
-    -Scope $deployment.Outputs.storageId
+    -Scope $deployment.Outputs.storageId.Value
 
 dotnet publish --configuration Release -o .\app
 Compress-Archive -Path ".\app\*" -DestinationPath .\app.zip
