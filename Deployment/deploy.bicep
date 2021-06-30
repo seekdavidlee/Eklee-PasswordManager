@@ -34,6 +34,22 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' = {
   }
 }
 
+resource storage 'Microsoft.Storage/storageAccounts@2021-02-01' = {
+  name: stackName
+  location: location
+  sku: {
+    name: 'Standard_LRS'
+  }
+  kind: 'StorageV2'
+  properties: {
+    supportsHttpsTrafficOnly: true
+    allowBlobPublicAccess: false
+  }
+  tags: tags
+}
+
+output storageId string = storage.id
+
 resource hostingPlan 'Microsoft.Web/serverfarms@2020-10-01' = {
   name: stackName
   location: location
@@ -49,6 +65,9 @@ resource passwordManagerApp 'Microsoft.Web/sites@2020-12-01' = {
   location: location
   tags: tags
   kind: 'app'
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
     httpsOnly: true
     serverFarmId: hostingPlan.id
@@ -133,3 +152,5 @@ resource passwordManagerApp 'Microsoft.Web/sites@2020-12-01' = {
     }
   }
 }
+
+output passwordManagerAppIdentityId string = passwordManagerApp.identity.principalId

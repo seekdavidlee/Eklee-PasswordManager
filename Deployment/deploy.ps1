@@ -36,11 +36,15 @@ $parameters = @{
     clientSecret      = $ClientSecret;
 }
 
-New-AzResourceGroupDeployment `
+$deployment = New-AzResourceGroupDeployment `
     -Name $DeploymentName `
     -ResourceGroupName $DeployResourceGroupName `
     -TemplateFile .\Deployment\deploy.json `
     -TemplateParameterObject $parameters
+
+New-AzRoleAssignment -ObjectId $deployment.Outputs.passwordManagerAppIdentityId `
+    -RoleDefinitionName 'Storage Blob Data Contributor' `
+    -Scope $deployment.Outputs.storageId
 
 dotnet publish --configuration Release -o .\app
 Compress-Archive -Path ".\app\*" -DestinationPath .\app.zip
