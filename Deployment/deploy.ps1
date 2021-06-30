@@ -42,9 +42,14 @@ $deployment = New-AzResourceGroupDeployment `
     -TemplateFile .\Deployment\deploy.json `
     -TemplateParameterObject $parameters
 
-New-AzRoleAssignment -ObjectId $deployment.Outputs.passwordManagerAppIdentityId.Value `
-    -RoleDefinitionName 'Storage Blob Data Contributor' `
-    -Scope $deployment.Outputs.storageId.Value
+try {
+    New-AzRoleAssignment -ObjectId $deployment.Outputs.passwordManagerAppIdentityId.Value `
+        -RoleDefinitionName 'Storage Blob Data Contributor' `
+        -Scope $deployment.Outputs.storageId.Value
+}
+catch [Microsoft.Rest.Azure.CloudException] {
+    throw $_.Body
+}
 
 dotnet publish --configuration Release -o .\app
 Compress-Archive -Path ".\app\*" -DestinationPath .\app.zip
