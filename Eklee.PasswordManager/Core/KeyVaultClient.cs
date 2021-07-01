@@ -1,24 +1,37 @@
 ﻿using Microsoft.Identity.Web;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Eklee.PasswordManager.Core
 {
+	public class KeyVaultSecret
+	{
+		public string Id { get; set; }
+	}
+
+	public class KeyVaultSecretValue
+	{
+		public string Value { get; set; }
+	}
+
+	public class KeyVaultSecretList
+	{
+		[JsonProperty("value")]
+		public List<KeyVaultSecret> Values { get; set; }
+	}
+
 	public class KeyVaultClient : IKeyVaultClient
 	{
-		private readonly IManagementClient _managementClient;
 		private readonly IDownstreamWebApi _downstreamAPI;
 		private const string _version = "api-version=7.1";
 
-		public KeyVaultClient(IManagementClient managementClient, IDownstreamWebApi downstreamAPI)
+		public KeyVaultClient(IDownstreamWebApi downstreamAPI)
 		{
-			_managementClient = managementClient;
 			_downstreamAPI = downstreamAPI;
 		}
 
-		public async Task<IEnumerable<SecretItem>> ListSecrets(ClaimsPrincipal claimsPrincipal)
+		public async Task<IEnumerable<KeyVaultSecret>> ListSecrets()
 		{
 			var result = await _downstreamAPI.CallWebApiForUserAsync("KeyVault", x =>
 			{
@@ -29,21 +42,10 @@ namespace Eklee.PasswordManager.Core
 
 			var content = await result.Content.ReadAsStringAsync();
 
-			var secretsResult = JsonConvert.DeserializeObject<SecretItemList>(content);
-
-			var secrets = new List<SecretItem>();
-			foreach (var item in secretsResult.Values)
-			{
-				if (await _managementClient.CanReadSecret(claimsPrincipal, item.Name))
-				{
-					secrets.Add(item);
-				}
-			}
-
-			return secrets;
+			return JsonConvert.DeserializeObject<KeyVaultSecretList>(content).Values;
 		}
 
-		public async Task<SecretValue> GetSecretValue(string name)
+		public async Task<KeyVaultSecretValue> GetSecretValue(string name)
 		{
 			var result = await _downstreamAPI.CallWebApiForUserAsync("KeyVault", x =>
 			{
@@ -54,7 +56,7 @@ namespace Eklee.PasswordManager.Core
 
 			var content = await result.Content.ReadAsStringAsync();
 
-			return JsonConvert.DeserializeObject<SecretValue>(content);
+			return JsonConvert.DeserializeObject<KeyVaultSecretValue>(content);
 		}
 	}
 }

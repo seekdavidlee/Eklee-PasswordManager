@@ -1,4 +1,5 @@
 using Eklee.PasswordManager.Core;
+using Eklee.PasswordManager.Data;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -26,6 +27,8 @@ namespace Eklee.PasswordManager
 			services.AddScoped<IKeyVaultClient, KeyVaultClient>();
 			services.AddScoped<IManagementClient, ManagementClient>();
 			services.AddScoped<ClipboardService>();
+			services.AddScoped<IUserMetaDataService, UserMetaDataService>();
+			services.AddScoped<ISecretsService, SecretsService>();
 
 			string signalRConnection = Configuration["SignalRConnection"];
 			if (!string.IsNullOrEmpty(signalRConnection))

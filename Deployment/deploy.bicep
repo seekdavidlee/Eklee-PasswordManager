@@ -148,6 +148,10 @@ resource passwordManagerApp 'Microsoft.Web/sites@2020-12-01' = {
           'name': 'ASPNETCORE_ENVIRONMENT'
           'value': 'development'
         }
+        {
+          'name': 'StorageName'
+          'value': stackName
+        }
       ]
     }
   }
