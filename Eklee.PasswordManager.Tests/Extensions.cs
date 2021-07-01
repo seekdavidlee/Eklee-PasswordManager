@@ -12,7 +12,7 @@ namespace Eklee.PasswordManager.Tests
 	{
 		public static void AssertTableColumnTextIsPresent(this EdgeDriver edge, string text)
 		{
-			var e = edge.FindElement(By.XPath($"//td[text() = '{text}']"));
+			var e = edge.FindElement(By.XPath($"//td/div[text() = '{text}']"));
 			Assert.IsNotNull(e);
 		}
 
@@ -20,7 +20,7 @@ namespace Eklee.PasswordManager.Tests
 		{
 			Assert.ThrowsException<NoSuchElementException>(() =>
 			{
-				var e = edge.FindElement(By.XPath($"//td[text() = '{text}']"));
+				var e = edge.FindElement(By.XPath($"//td/div[text() = '{text}']"));
 			});
 		}
 
