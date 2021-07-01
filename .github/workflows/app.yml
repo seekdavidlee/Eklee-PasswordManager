@@ -1,11 +1,11 @@
 on: 
   push:
   workflow_dispatch:
-  inputs:
-    environmentselector:
-      description: 'Environment selector'     
-      required: false
-      default: 'default'
+    inputs:
+      environmentselector:
+        description: 'Environment selector'     
+        required: false
+        default: 'default'
 
 jobs:
   setup:
