@@ -15,6 +15,7 @@ jobs:
       - id: setup
         name: Setup Environment Setp
         run: |
+          Write-Host "Environment Selector: ${{ github.event.inputs.environmentselector }}"
           echo "::debug::Branch ${{ github.ref }}"
           if ('${{ github.ref }}' -eq 'refs/heads/main') { 
             echo "::set-output name=build_env::prod" 
