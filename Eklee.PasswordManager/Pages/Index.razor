@@ -3,10 +3,11 @@
 @using Microsoft.Identity.Web
 @using Microsoft.Extensions.Logging
 @inject ClipboardService ClipboardService
-@inject IKeyVaultClient _keyVaultClient
+@inject ISecretsService SecretsService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject MicrosoftIdentityConsentAndConditionalAccessHandler ConsentHandler
 @inject ILogger<Index> Logger
+@inject IJSRuntime JSRuntime
 @code{
 
 	private string TokenMessage;
@@ -19,7 +20,7 @@
 			var state = await this.AuthenticationStateProvider.GetAuthenticationStateAsync();
 			if (state.User.Identity.IsAuthenticated)
 			{
-				_secrets = (await _keyVaultClient.ListSecrets(state.User)).ToList();
+				_secrets = (await SecretsService.ListSecrets(state.User)).ToList();
 			}
 		}
 		catch (Exception e)
@@ -39,18 +40,18 @@
 
 	private async Task CopyToClipboard(SecretItem item)
 	{
-		SecretValue secret = null;
+		string secret = null;
 		try
 		{
-			secret = await _keyVaultClient.GetSecretValue(item.Name);
-			await ClipboardService.WriteTextAsync(secret.Value);
+			secret = await SecretsService.GetValue(item.Name);
+			await ClipboardService.WriteTextAsync(secret);
 			item.Copied = true;
 		}
 		catch (Exception e)
 		{
 			if (secret != null)
 			{
-				item.Value = secret.Value;
+				item.Value = secret;
 				item.ShowInput = true;
 			}
 			else
@@ -65,6 +66,20 @@
 	{
 		item.Value = null;
 		item.ShowInput = false;
+	}
+
+	private async Task SwitchEditContext(SecretItem item)
+	{
+		if (item.SwitchEditContext() == SecretItemEditMode.Edit)
+		{
+			await JSRuntime.InvokeVoidAsync($"focusElement", item.InputId);
+		}
+	}
+
+	private async Task SaveChanges(SecretItem item)
+	{
+		var state = await this.AuthenticationStateProvider.GetAuthenticationStateAsync();
+		await SecretsService.Save(item, state.User);
 	}
 }
 <h1>Secrets</h1>
@@ -84,7 +99,10 @@
 			foreach (var item in _secrets)
 			{
 				<tr>
-					<td>@item.Name</td>
+					<td>
+						<div class="@item.DivClass1" @onclick="async () => await SwitchEditContext(item)">@item.DisplayName</div>
+						<div class="@item.DivClass2"><input id="@item.InputId" class="form-control" type="text" value="@item.DisplayName" @onchange="async (ChangeEventArgs e)=> { item.DisplayName = e.Value.ToString(); await SaveChanges(item); }" @onblur="async () => await SwitchEditContext(item)"></div>
+					</td>
 					<td>
 						<button type="button" class="btn btn-primary" @onclick="async () => await CopyToClipboard(item)">Copy to Clipboard</button>
 					</td>
