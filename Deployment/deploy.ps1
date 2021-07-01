@@ -43,13 +43,22 @@ $deployment = New-AzResourceGroupDeployment `
     -TemplateParameterObject $parameters
 
 try {
-    New-AzRoleAssignment -ObjectId $deployment.Outputs.passwordManagerAppIdentityId.Value `
-        -RoleDefinitionName 'Storage Blob Data Contributor' `
-        -Scope $deployment.Outputs.storageId.Value
+
+    $assignments = Get-AzRoleAssignment -Scope $deployment.Outputs.storageId.Value
+    $results = $assignments | Where-Object { $_.ObjectId -eq $deployment.Outputs.passwordManagerAppIdentityId.Value }
+
+    if ($results.Count -eq 0) {
+        New-AzRoleAssignment -ObjectId $deployment.Outputs.passwordManagerAppIdentityId.Value `
+            -RoleDefinitionName 'Storage Blob Data Contributor' `
+            -Scope $deployment.Outputs.storageId.Value
+    }
+    else {
+        Write-Host "Role has been assigned."
+    }
 }
 catch [Microsoft.Rest.Azure.CloudException] {
     Resolve-AzError $Error[0]
-    throw $Error[0].Message
+    throw "An error has occured on role assignment."
 }
 
 dotnet publish --configuration Release -o .\app
