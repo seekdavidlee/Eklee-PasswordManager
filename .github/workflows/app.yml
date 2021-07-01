@@ -1,5 +1,11 @@
 on: push
 
+inputs:
+  environmentselector:
+    description: 'Environment file selector'
+    required: false
+    default: 'default'
+
 jobs:
   setup:
     name: Choose Secrets Environment Job
