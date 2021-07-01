@@ -1,10 +1,11 @@
-on: push
-
-inputs:
-  environmentselector:
-    description: 'Environment file selector'
-    required: false
-    default: 'default'
+on: 
+  push:
+  workflow_dispatch:
+  inputs:
+    environmentselector:
+      description: 'Environment selector'     
+      required: false
+      default: 'default'
 
 jobs:
   setup:
