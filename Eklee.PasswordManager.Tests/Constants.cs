@@ -8,8 +8,8 @@
 
 		public static class TestCategory
 		{
-			public const string Functional = "Functional";
-			public const string Unit = "Unit";
+			public const string Functional = "functional";
+			public const string Unit = "unit";
 		}
 	}
 }

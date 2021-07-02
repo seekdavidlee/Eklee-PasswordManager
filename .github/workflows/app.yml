@@ -52,6 +52,18 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
 
+      - id: unittest
+        name: Unit Test
+        run: |
+            $unitTestFilePath = "${{ env.RUNNER_TEMP }}\TestResults\unittests.xml"
+            dotnet test --logger "junit;LogFilePath=$unitTestFilePath" --filter TestCategory=unit
+            Write-Host "::set-output name=unit_test_file_path::$unitTestFilePath"
+            
+      - name: Publish unit test results        
+        uses: EnricoMi/publish-unit-test-result-action/composite@v1
+        with:
+          files: ${{ steps.unittest.outputs.unit_test_file_path }}
+
       - name: Azure CLI Login
         uses: azure/login@v1
         with:
@@ -83,7 +95,7 @@ jobs:
         name: Test
         run: Deployment\Test.ps1 -StackName ${{ secrets.STACKNAME }} -TenantId ${{ secrets.TENANT_ID }} -ReportDirectory "${{ env.RUNNER_TEMP }}" -TestConfig "${{ secrets.TEST_CONFIG }}"
 
-      - name: Publish dotnet test results
+      - name: Publish functional test results
         if: ${{ needs.setup.outputs.skip_functional_test == 'false' && always() }}
         uses: EnricoMi/publish-unit-test-result-action/composite@v1
         with:

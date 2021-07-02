@@ -72,8 +72,10 @@ namespace Eklee.PasswordManager.Core
 			{
 				var parts = kvs.Id.Split('/');
 
-				var item = new SecretItem();
-				item.Name = parts[parts.Length - 1];
+				var item = new SecretItem
+				{
+					Name = parts[parts.Length - 1]
+				};
 
 				SecretMetaData secretMetaData = null;
 				if (meta.Items != null)
