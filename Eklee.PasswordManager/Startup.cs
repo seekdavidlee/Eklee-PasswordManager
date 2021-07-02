@@ -29,6 +29,7 @@ namespace Eklee.PasswordManager
 			services.AddScoped<ClipboardService>();
 			services.AddScoped<IUserMetaDataService, UserMetaDataService>();
 			services.AddScoped<ISecretsService, SecretsService>();
+			services.AddScoped<ISecurityContext, SecurityContext>();
 
 			string signalRConnection = Configuration["SignalRConnection"];
 			if (!string.IsNullOrEmpty(signalRConnection))

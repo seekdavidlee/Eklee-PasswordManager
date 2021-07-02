@@ -4,6 +4,7 @@
 @using Microsoft.Extensions.Logging
 @inject ClipboardService ClipboardService
 @inject ISecretsService SecretsService
+@inject ISecurityContext SecurityContext
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject MicrosoftIdentityConsentAndConditionalAccessHandler ConsentHandler
 @inject ILogger<Index> Logger
@@ -17,10 +18,11 @@
 	{
 		try
 		{
-			var state = await this.AuthenticationStateProvider.GetAuthenticationStateAsync();
-			if (state.User.Identity.IsAuthenticated)
+			await SecurityContext.Configure(this.AuthenticationStateProvider);
+
+			if (SecurityContext.IsAuthenticated())
 			{
-				_secrets = (await SecretsService.ListSecrets(state.User)).ToList();
+				_secrets = (await SecretsService.ListSecrets()).ToList();
 			}
 		}
 		catch (Exception e)
@@ -78,8 +80,8 @@
 
 	private async Task SaveChanges(SecretItem item)
 	{
-		var state = await this.AuthenticationStateProvider.GetAuthenticationStateAsync();
-		await SecretsService.Save(item, state.User);
+		await SecurityContext.Configure(this.AuthenticationStateProvider);
+		await SecretsService.Save(item);
 	}
 }
 <h1>Secrets</h1>

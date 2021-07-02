@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
 using System.IO;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Eklee.PasswordManager.Data
@@ -14,10 +13,13 @@ namespace Eklee.PasswordManager.Data
 	{
 		private readonly string _containerName;
 		private readonly string _storageName;
-		public UserMetaDataService(IConfiguration configuration)
+		private readonly ISecurityContext _securityContext;
+
+		public UserMetaDataService(IConfiguration configuration, ISecurityContext securityContext)
 		{
 			_containerName = configuration["KeyVaultName"];
 			_storageName = configuration["StorageName"];
+			_securityContext = securityContext;
 		}
 
 		private BlobContainerClient _client;
@@ -42,15 +44,15 @@ namespace Eklee.PasswordManager.Data
 			return _client;
 		}
 
-		public async Task Save(ClaimsPrincipal claimsPrincipal, UserMetaData userMetaData)
+		public async Task Save(UserMetaData userMetaData)
 		{
-			var blobClient = await GetUserBlobClient(claimsPrincipal);
+			var blobClient = await GetUserBlobClient();
 			await blobClient.UploadAsync(BinaryData.FromString(JsonConvert.SerializeObject(userMetaData)), true);
 		}
 
-		public async Task<UserMetaData> Get(ClaimsPrincipal claimsPrincipal)
+		public async Task<UserMetaData> Get()
 		{
-			var blobClient = await GetUserBlobClient(claimsPrincipal);
+			var blobClient = await GetUserBlobClient();
 
 			using var stream = new MemoryStream();
 			var content = await blobClient.DownloadContentAsync();
@@ -58,15 +60,15 @@ namespace Eklee.PasswordManager.Data
 				content.Value.Content.ToString());
 		}
 
-		public async Task<bool> Exist(ClaimsPrincipal claimsPrincipal)
+		public async Task<bool> Exist()
 		{
-			return await (await GetUserBlobClient(claimsPrincipal)).ExistsAsync();
+			return await (await GetUserBlobClient()).ExistsAsync();
 		}
 
-		private async Task<BlobClient> GetUserBlobClient(ClaimsPrincipal claimsPrincipal)
+		private async Task<BlobClient> GetUserBlobClient()
 		{
 			var client = await GetBlobContainerClient();
-			string blobName = $"{claimsPrincipal.UserId()}.json";
+			string blobName = $"{_securityContext.UserId()}.json";
 			var blobClient = client.GetBlobClient(blobName);
 
 			return blobClient;
