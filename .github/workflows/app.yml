@@ -1,4 +1,11 @@
-on: push
+on: 
+  push:
+  workflow_dispatch:
+    inputs:
+      environmentselector:
+        description: 'Environment selector'     
+        required: false
+        default: 'default'
 
 jobs:
   setup:
@@ -8,14 +15,23 @@ jobs:
       - id: setup
         name: Setup Environment Setp
         run: |
-          echo "::debug::Branch ${{ github.ref }}"
-          if ('${{ github.ref }}' -eq 'refs/heads/main') { 
-            echo "::set-output name=build_env::prod" 
+          $envSelector = "${{ github.event.inputs.environmentselector }}"
+          Write-Host "Environment Selector: $envSelector Branch ${{ github.ref }}"
+          if ($envSelector -eq '' -or $envSelector -eq 'default') {            
+            if ('${{ github.ref }}' -eq 'refs/heads/main') { 
+              echo "::set-output name=build_env::prod"
+              echo "::set-output name=skip_functional_test::true" 
+            } else {
+              echo "::set-output name=build_env::dev"
+              echo "::set-output name=skip_functional_test::false" 
+            }
           } else {
-            echo "::set-output name=build_env::dev" 
+            echo "::set-output name=build_env::$envSelector"
+            echo "::set-output name=skip_functional_test::true" 
           }
     outputs:
       build_env: ${{ steps.setup.outputs.build_env }}
+      skip_functional_test: ${{ steps.setup.outputs.skip_functional_test }}
 
   build_deploy_password_manager:
     name: Build, Deploy Password Manager Job
@@ -63,18 +79,18 @@ jobs:
           azPSVersion: "latest"
 
       - id: testresults
-        if: ${{ github.ref != 'refs/heads/main' }}
+        if: ${{ needs.setup.outputs.skip_functional_test == 'false' }}
         name: Test
         run: Deployment\Test.ps1 -StackName ${{ secrets.STACKNAME }} -TenantId ${{ secrets.TENANT_ID }} -ReportDirectory "${{ env.RUNNER_TEMP }}" -TestConfig "${{ secrets.TEST_CONFIG }}"
 
       - name: Publish dotnet test results
-        if: ${{ github.ref != 'refs/heads/main' && always() }}
+        if: ${{ needs.setup.outputs.skip_functional_test == 'false' && always() }}
         uses: EnricoMi/publish-unit-test-result-action/composite@v1
         with:
           files: ${{ steps.testresults.outputs.test_file_path }}
 
       - name: Teardown Azure environment resources (except production)
-        if: ${{ github.ref != 'refs/heads/main' && success() }}
+        if: ${{ needs.setup.outputs.skip_functional_test == 'false' && success() }}
         uses: azure/powershell@v1
         with:
           inlineScript: >
