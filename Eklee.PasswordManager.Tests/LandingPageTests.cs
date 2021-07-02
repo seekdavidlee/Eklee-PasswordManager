@@ -2,6 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Eklee.PasswordManager.Tests
 {
+	[TestCategory(Constants.TestCategory.Functional)]
 	[TestClass]
 	public class LandingPageTests : BaseTest
 	{

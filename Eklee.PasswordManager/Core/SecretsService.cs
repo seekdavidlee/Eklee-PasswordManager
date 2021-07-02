@@ -1,7 +1,6 @@
 ﻿using Eklee.PasswordManager.Data;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Eklee.PasswordManager.Core
@@ -28,9 +27,9 @@ namespace Eklee.PasswordManager.Core
 			return item.Value;
 		}
 
-		public async Task Save(SecretItem secretItem, ClaimsPrincipal claimsPrincipal)
+		public async Task Save(SecretItem secretItem)
 		{
-			var meta = await GetUserMetaData(claimsPrincipal);
+			var meta = await GetUserMetaData();
 
 			if (meta.Items == null) meta.Items = new List<SecretMetaData>();
 
@@ -45,36 +44,37 @@ namespace Eklee.PasswordManager.Core
 				item.DisplayName = secretItem.DisplayName;
 			}
 
-			await _userMetaDataService.Save(claimsPrincipal, meta);
+			await _userMetaDataService.Save(meta);
 		}
 
-		private async Task<UserMetaData> GetUserMetaData(ClaimsPrincipal claimsPrincipal)
+		private async Task<UserMetaData> GetUserMetaData()
 		{
 			UserMetaData meta;
-			if (!await _userMetaDataService.Exist(claimsPrincipal))
+			if (!await _userMetaDataService.Exist())
 			{
 				meta = new UserMetaData { Created = System.DateTime.UtcNow };
-				await _userMetaDataService.Save(claimsPrincipal, meta);
 			}
 			else
 			{
-				meta = await _userMetaDataService.Get(claimsPrincipal);
+				meta = await _userMetaDataService.Get();
 			}
 			return meta;
 		}
 
-		public async Task<IEnumerable<SecretItem>> ListSecrets(ClaimsPrincipal claimsPrincipal)
+		public async Task<IEnumerable<SecretItem>> ListSecrets()
 		{
 			var secrets = new List<SecretItem>();
 
-			var meta = await GetUserMetaData(claimsPrincipal);
+			var meta = await GetUserMetaData();
 
 			foreach (var kvs in await _keyVaultClient.ListSecrets())
 			{
 				var parts = kvs.Id.Split('/');
 
-				var item = new SecretItem();
-				item.Name = parts[parts.Length - 1];
+				var item = new SecretItem
+				{
+					Name = parts[parts.Length - 1]
+				};
 
 				SecretMetaData secretMetaData = null;
 				if (meta.Items != null)
@@ -88,7 +88,7 @@ namespace Eklee.PasswordManager.Core
 
 				if (secretMetaData == null) item.DisplayName = item.Name;
 
-				if (await _managementClient.CanReadSecret(claimsPrincipal, item.Name))
+				if (await _managementClient.CanReadSecret(item.Name))
 				{
 					secrets.Add(item);
 				}

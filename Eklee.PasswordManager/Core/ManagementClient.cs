@@ -1,10 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Web;
 using Newtonsoft.Json;
-using System;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Eklee.PasswordManager.Core
@@ -16,10 +13,12 @@ namespace Eklee.PasswordManager.Core
 		private const string ManagementUri = "subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.KeyVault/vaults/{2}/secrets/_secret_/providers/Microsoft.Authorization/roleAssignments?api-version=2015-07-01&$filter=assignedTo('_objectId_')";
 		private readonly string _url;
 		private readonly IDownstreamWebApi _downstreamAPI;
+		private readonly ISecurityContext _securityContext;
 
 		public ManagementClient(
 			IConfiguration configuration,
-			IDownstreamWebApi downstreamAPI)
+			IDownstreamWebApi downstreamAPI,
+			ISecurityContext securityContext)
 		{
 			var keyVaultName = configuration["KeyVaultName"];
 			var subscriptionId = configuration["Management:SubscriptionId"];
@@ -27,16 +26,12 @@ namespace Eklee.PasswordManager.Core
 
 			_url = string.Format(ManagementUri, subscriptionId, resourceGroupName, keyVaultName);
 			_downstreamAPI = downstreamAPI;
+			_securityContext = securityContext;
 		}
 
-		public async Task<bool> CanReadSecret(ClaimsPrincipal claimsPrincipal, string name)
+		public async Task<bool> CanReadSecret(string name)
 		{
-			var objectId = claimsPrincipal.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier").Value;
-
-			if (string.IsNullOrEmpty(objectId))
-			{
-				throw new Exception("Invalid user object id");
-			}
+			var objectId = _securityContext.UserObjectId();
 
 			var result = await _downstreamAPI.CallWebApiForUserAsync("Management", x =>
 			{
