@@ -53,7 +53,6 @@ namespace Eklee.PasswordManager.Core
 			if (!await _userMetaDataService.Exist())
 			{
 				meta = new UserMetaData { Created = System.DateTime.UtcNow };
-				await _userMetaDataService.Save(meta);
 			}
 			else
 			{
