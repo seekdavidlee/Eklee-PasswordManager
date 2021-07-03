@@ -56,13 +56,7 @@ jobs:
         name: Unit Tests
         run: |
             $unitTestFilePath = "${{ env.RUNNER_TEMP }}\TestResults\unittests.xml"
-            dotnet test --logger "junit;LogFilePath=$unitTestFilePath" --filter TestCategory=unit            
-            
-      - name: Publish unit test results
-        if: ${{ needs.setup.outputs.skip_functional_test == 'true' }}       
-        uses: EnricoMi/publish-unit-test-result-action/composite@v1
-        with:
-          files: ${{ env.RUNNER_TEMP }}/TestResults/*.xml
+            dotnet test --logger "junit;LogFilePath=$unitTestFilePath" --filter TestCategory=unit
 
       - name: Azure CLI Login
         uses: azure/login@v1
@@ -95,8 +89,8 @@ jobs:
         name: Functional Tests
         run: Deployment\Test.ps1 -StackName ${{ secrets.STACKNAME }} -TenantId ${{ secrets.TENANT_ID }} -ReportDirectory "${{ env.RUNNER_TEMP }}\TestResults" -TestConfig "${{ secrets.TEST_CONFIG }}"
 
-      - name: Publish functional test results
-        if: ${{ needs.setup.outputs.skip_functional_test == 'false' && always() }}
+      - name: Publish test results
+        if: ${{ always() }}
         uses: EnricoMi/publish-unit-test-result-action/composite@v1
         with:
           files: ${{ env.RUNNER_TEMP }}/TestResults/*.xml
