@@ -53,16 +53,10 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - id: unittest
-        name: Unit Test
+        name: Unit Tests
         run: |
             $unitTestFilePath = "${{ env.RUNNER_TEMP }}\TestResults\unittests.xml"
             dotnet test --logger "junit;LogFilePath=$unitTestFilePath" --filter TestCategory=unit
-            Write-Host "::set-output name=unit_test_file_path::$unitTestFilePath"
-            
-      - name: Publish unit test results        
-        uses: EnricoMi/publish-unit-test-result-action/composite@v1
-        with:
-          files: ${{ steps.unittest.outputs.unit_test_file_path }}
 
       - name: Azure CLI Login
         uses: azure/login@v1
@@ -92,14 +86,14 @@ jobs:
 
       - id: testresults
         if: ${{ needs.setup.outputs.skip_functional_test == 'false' }}
-        name: Test
-        run: Deployment\Test.ps1 -StackName ${{ secrets.STACKNAME }} -TenantId ${{ secrets.TENANT_ID }} -ReportDirectory "${{ env.RUNNER_TEMP }}" -TestConfig "${{ secrets.TEST_CONFIG }}"
+        name: Functional Tests
+        run: Deployment\Test.ps1 -StackName ${{ secrets.STACKNAME }} -TenantId ${{ secrets.TENANT_ID }} -ReportDirectory "${{ env.RUNNER_TEMP }}\TestResults" -TestConfig "${{ secrets.TEST_CONFIG }}"
 
-      - name: Publish functional test results
-        if: ${{ needs.setup.outputs.skip_functional_test == 'false' && always() }}
+      - name: Publish test results
+        if: ${{ always() }}
         uses: EnricoMi/publish-unit-test-result-action/composite@v1
         with:
-          files: ${{ steps.testresults.outputs.test_file_path }}
+          files: ${{ env.RUNNER_TEMP }}/TestResults/*.xml
 
       - name: Teardown Azure environment resources (except production)
         if: ${{ needs.setup.outputs.skip_functional_test == 'false' && success() }}
